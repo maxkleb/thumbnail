@@ -29,11 +29,12 @@ func writeResponseError(w http.ResponseWriter, errMsg string, httpCode int) {
 }
 
 func Run() {
-	log.Println("Starting thumbnail server...")
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "9090"
 	}
+
+	log.Println("Starting thumbnail server with port "+ port +"...")
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/health", healthHandler).Methods("GET")
 	router.HandleFunc("/thumbnail", thumbnailHandler).Methods("GET")
@@ -42,6 +43,7 @@ func Run() {
 }
 
 func healthHandler(w http.ResponseWriter, _ *http.Request) {
+	log.Println("Health check has called")
 	w.WriteHeader(http.StatusOK)
 }
 
