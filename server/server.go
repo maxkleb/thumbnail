@@ -68,7 +68,7 @@ func thumbnailHandler(w http.ResponseWriter, r *http.Request) {
 	buf := new(bytes.Buffer)
 	err = jpeg.Encode(buf, finalImage, nil)
 	if err != nil {
-		writeResponseError(w, "error encoding image decoding ", http.StatusBadRequest)
+		writeResponseError(w, "error during image transformation ", http.StatusInternalServerError)
 		return
 	}
 
