@@ -1,4 +1,4 @@
-package transformation
+package transform
 
 import (
 	"github.com/nfnt/resize"

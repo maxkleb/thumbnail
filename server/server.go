@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"github.com/maxkleb/thumbnail/transformation"
+	"github.com/maxkleb/thumbnail/transform"
 	"image"
 	"image/jpeg"
 	"log"
@@ -82,7 +82,7 @@ func thumbnailHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	finalImage := transformation.ProcessImg(x, y, img)
+	finalImage := transform.ProcessImg(x, y, img)
 
 	buf := new(bytes.Buffer)
 	err = jpeg.Encode(buf, finalImage, nil)
