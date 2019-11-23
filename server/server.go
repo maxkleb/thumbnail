@@ -24,7 +24,7 @@ func Run() {
 		port = "9090"
 	}
 
-	log.Println("Starting thumbnail server with port "+ port +"...")
+	log.Println("Starting thumbnail server with port " + port + "...")
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/health", healthHandler).Methods("GET")
 	router.HandleFunc("/thumbnail", thumbnailHandler).Methods("GET")
@@ -36,19 +36,6 @@ func healthHandler(w http.ResponseWriter, _ *http.Request) {
 	log.Println("Health check has called")
 	w.WriteHeader(http.StatusOK)
 }
-
-func writeResponseError(w http.ResponseWriter, errMsg string, httpCode int) {
-	js, err := json.Marshal(ThumbnailError{Code: httpCode, Message: errMsg})
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	_, err = w.Write(js)
-	if err != nil {
-		log.Fatal("Cannot send response!")
-	}
-}
-
 
 func thumbnailHandler(w http.ResponseWriter, r *http.Request) {
 	x, err := strconv.Atoi(r.URL.Query().Get("width"))
@@ -90,14 +77,25 @@ func thumbnailHandler(w http.ResponseWriter, r *http.Request) {
 		writeResponseError(w, "error encoding image decoding ", http.StatusBadRequest)
 		return
 	}
-	resBytes := buf.Bytes()
 
+	resBytes := buf.Bytes()
 	// Encode the image data and write as an server response
 	w.Header().Set("Content-Type", "image/jpeg")
 	w.Header().Set("Content-Length", strconv.Itoa(len(resBytes)))
 	if _, err = w.Write(resBytes); err != nil {
-		writeResponseError(w,"unable to reconstruct image", http.StatusInternalServerError)
+		writeResponseError(w, "unable to reconstruct image", http.StatusInternalServerError)
 		return
 	}
+}
 
+func writeResponseError(w http.ResponseWriter, errMsg string, httpCode int) {
+	js, err := json.Marshal(ThumbnailError{Code: httpCode, Message: errMsg})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	_, err = w.Write(js)
+	if err != nil {
+		log.Fatal("Cannot send response!")
+	}
 }

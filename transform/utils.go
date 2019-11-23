@@ -9,22 +9,22 @@ import (
 
 // Crop and add padding if needed
 func ProcessImg(x int, y int, img image.Image) image.Image {
-	requiredAspectRatio := float64(y)/float64(x)
+	requiredAspectRatio := float64(y) / float64(x)
 	imgX := img.Bounds().Dx()
 	imgY := img.Bounds().Dy()
-	imageAspectRatio := float64(imgY)/float64(imgX)
+	imageAspectRatio := float64(imgY) / float64(imgX)
 	if requiredAspectRatio == imageAspectRatio && x == imgX {
 		return img
-	} else if requiredAspectRatio == imageAspectRatio && x < imgX{
+	} else if requiredAspectRatio == imageAspectRatio && x < imgX {
 		return resize.Resize(uint(x), uint(y), img, resize.Lanczos3)
-	} else  {
+	} else {
 		if x >= imgX && y >= imgY {
 			return addPadding(x, y, img)
 		}
-		ratioX := float64(x)/float64(imgX)
-		ratioY := float64(y)/float64(imgY)
+		ratioX := float64(x) / float64(imgX)
+		ratioY := float64(y) / float64(imgY)
 		if ratioX < ratioY {
-			img = resize.Resize(uint(x), uint(float64(x) * imageAspectRatio), img, resize.Lanczos3)
+			img = resize.Resize(uint(x), uint(float64(x)*imageAspectRatio), img, resize.Lanczos3)
 			return addPadding(x, y, img)
 		}
 		newX := uint(float64(y) / imageAspectRatio)

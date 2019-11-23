@@ -98,7 +98,7 @@ func loadImg(path string) image.Image {
 	defer file.Close()
 	img, _, err := image.Decode(file)
 	if err != nil {
-		panic("Failed to load source img " + err.Error())
+		log.Println("Failed to load source img " + err.Error())
 	}
 	return img
 }
