@@ -10,6 +10,7 @@ import (
 	"image/jpeg"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 )
 
@@ -28,10 +29,15 @@ func writeResponseError(w http.ResponseWriter, errMsg string, httpCode int) {
 }
 
 func Run() {
+	log.Println("Starting thumbnail server...")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "9090"
+	}
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/health", healthHandler).Methods("GET")
 	router.HandleFunc("/thumbnail", thumbnailHandler).Methods("GET")
-	address := ":" + "9090"
+	address := ":" + port
 	log.Fatal(http.ListenAndServe(address, router))
 }
 
