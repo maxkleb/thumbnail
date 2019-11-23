@@ -14,8 +14,9 @@ func downloadImage(url string) ([]byte, error) {
 	}
 
 	if response.StatusCode != 200 {
-		return nil, errors.New(
+		err := errors.New(
 			fmt.Sprintf("bad response during fetching image, status code %v", response.StatusCode))
+		return nil, err
 	}
 
 	defer response.Body.Close()

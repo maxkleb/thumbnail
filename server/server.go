@@ -43,7 +43,10 @@ func writeResponseError(w http.ResponseWriter, errMsg string, httpCode int) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write(js)
+	_, err = w.Write(js)
+	if err != nil {
+		log.Fatal("Cannot send response!")
+	}
 }
 
 
@@ -83,6 +86,10 @@ func thumbnailHandler(w http.ResponseWriter, r *http.Request) {
 
 	buf := new(bytes.Buffer)
 	err = jpeg.Encode(buf, finalImage, nil)
+	if err != nil {
+		writeResponseError(w, "error encoding image decoding ", http.StatusBadRequest)
+		return
+	}
 	resBytes := buf.Bytes()
 
 	// Encode the image data and write as an server response
