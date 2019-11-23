@@ -3,7 +3,6 @@ package server
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/maxkleb/thumbnail/transformation"
 	"image"
@@ -17,15 +16,6 @@ import (
 type ThumbnailError struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
-}
-
-func writeResponseError(w http.ResponseWriter, errMsg string, httpCode int) {
-	js, err := json.Marshal(ThumbnailError{Code: httpCode, Message: errMsg})
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Write(js)
 }
 
 func Run() {
@@ -47,15 +37,27 @@ func healthHandler(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func thumbnailHandler(w http.ResponseWriter, r *http.Request) {
-	x, err := strconv.Atoi(r.URL.Query().Get("x"))
+func writeResponseError(w http.ResponseWriter, errMsg string, httpCode int) {
+	js, err := json.Marshal(ThumbnailError{Code: httpCode, Message: errMsg})
 	if err != nil {
-		writeResponseError(w, "invalid input for x", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(js)
+}
+
+
+func thumbnailHandler(w http.ResponseWriter, r *http.Request) {
+	x, err := strconv.Atoi(r.URL.Query().Get("width"))
+	if err != nil {
+		writeResponseError(w, "invalid input for width", http.StatusBadRequest)
+		return
 	}
 
-	y, err := strconv.Atoi(r.URL.Query().Get("y"))
+	y, err := strconv.Atoi(r.URL.Query().Get("height"))
 	if err != nil {
-		writeResponseError(w, "invalid input for y", http.StatusBadRequest)
+		writeResponseError(w, "invalid input for height", http.StatusBadRequest)
+		return
 	}
 
 	url := r.URL.Query().Get("url")
@@ -63,11 +65,18 @@ func thumbnailHandler(w http.ResponseWriter, r *http.Request) {
 	imgBytes, err := downloadImage(url)
 	if err != nil {
 		writeResponseError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if imgBytes == nil {
+		writeResponseError(w, "cannot open provided image", http.StatusBadRequest)
+		return
 	}
 
 	img, _, err := image.Decode(bytes.NewReader(imgBytes))
 	if err != nil {
-		writeResponseError(w, "error during decoding image", http.StatusBadRequest)
+		writeResponseError(w, "error during image decoding ", http.StatusBadRequest)
+		return
 	}
 
 	finalImage := transformation.ProcessImg(x, y, img)
@@ -80,8 +89,8 @@ func thumbnailHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "image/jpeg")
 	w.Header().Set("Content-Length", strconv.Itoa(len(resBytes)))
 	if _, err = w.Write(resBytes); err != nil {
-		fmt.Println("unable to reconstruct image", http.StatusInternalServerError)
+		writeResponseError(w,"unable to reconstruct image", http.StatusInternalServerError)
+		return
 	}
-	log.Println("Image processing complete.")
-}
 
+}
