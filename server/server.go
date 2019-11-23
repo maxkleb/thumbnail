@@ -2,7 +2,6 @@ package server
 
 import (
 	"bytes"
-	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/maxkleb/thumbnail/transform"
 	"image"
@@ -12,11 +11,6 @@ import (
 	"os"
 	"strconv"
 )
-
-type ThumbnailError struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
 
 func Run() {
 	port := os.Getenv("PORT")
@@ -85,17 +79,5 @@ func thumbnailHandler(w http.ResponseWriter, r *http.Request) {
 	if _, err = w.Write(resBytes); err != nil {
 		writeResponseError(w, "unable to reconstruct image", http.StatusInternalServerError)
 		return
-	}
-}
-
-func writeResponseError(w http.ResponseWriter, errMsg string, httpCode int) {
-	js, err := json.Marshal(ThumbnailError{Code: httpCode, Message: errMsg})
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	_, err = w.Write(js)
-	if err != nil {
-		log.Fatal("Cannot send response!")
 	}
 }
